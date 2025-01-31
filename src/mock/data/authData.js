@@ -4,6 +4,9 @@ export const signInUserData = [
         avatar: '/img/avatars/thumb-1.jpg',
         userName: 'Charlie Howard',
         email: 'user1@themenate.net',
-        password: '2005ipo'
+        // password: '2005ipo',
+        
+        username: 'admin@gmail.com',
+        password: 'Admin@1234',
     }
 ]

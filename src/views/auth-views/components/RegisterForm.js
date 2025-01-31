@@ -87,7 +87,19 @@ export const RegisterForm = (props) => {
 			// showLoading()
 			// signUp(values)
 		} catch (err) {
-			console.error("err::", err);
+			console.log("err::", err?.response);
+			if (err?.response?.data?.data) {
+				const errorData = err.response.data.data; // Extract backend errors
+
+				// Convert backend errors into AntD Form format
+				const errorFields = Object.keys(errorData).map((field) => ({
+					name: field, // Field name (e.g., "password")
+					errors: [errorData[field]], // Error message from backend
+				}));
+
+				// Set errors in AntD Form
+				form.setFields(errorFields);
+			}
 		}
 	}
 

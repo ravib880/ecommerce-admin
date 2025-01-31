@@ -1,51 +1,79 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Button, Form, Input, Divider, Alert } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import { GoogleSVG, FacebookSVG } from 'assets/svg/icon';
 import CustomIcon from 'components/util-components/CustomIcon'
-import { 
-	signIn, 
-	showLoading, 
-	showAuthMessage, 
-	hideAuthMessage, 
-	signInWithGoogle, 
-	signInWithFacebook 
+import {
+	signIn,
+	showLoading,
+	showAuthMessage,
+	hideAuthMessage,
+	signInWithGoogle,
+	signInWithFacebook
 } from 'store/slices/authSlice';
 import { useNavigate } from 'react-router-dom'
 import { motion } from "framer-motion"
+import axios from 'axios';
+import { frontEndAPI } from 'constants/ApiConstant';
 
 export const LoginForm = props => {
-	
+
 	const navigate = useNavigate();
 
-	const { 
-		otherSignIn, 
-		showForgetPassword, 
+	const {
+		otherSignIn,
+		showForgetPassword,
 		hideAuthMessage,
 		onForgetPasswordClick,
 		showLoading,
 		signInWithGoogle,
 		signInWithFacebook,
-		extra, 
-		signIn, 
-		token, 
-		loading,
+		extra,
+		signIn,
+		token,
+		// loading,
 		redirect,
 		showMessage,
-		message,
+		// message,
 		allowRedirect = true
 	} = props
 
 	const initialCredential = {
-		email: 'user1@themenate.net',
-		password: '2005ipo'
+		// email: 'user1@themenate.net',
+		// password: '2005ipo'
+		email: '',
+		password: ''
 	}
+	const [loading, setLoading] = useState(false);
+	const [message, setMessage] = useState({ type: "error", text: "" });
 
-	const onLogin = values => {
-		showLoading()
-		signIn(values);
+	const onLogin = async (values) => {
+		// showLoading()
+		// signIn(values);
+
+		setLoading(true);
+		try {
+			const { data } = await axios.post(frontEndAPI?.signin, { ...values, role: "ADMIN" })
+			setLoading(false);
+			console.log("data::", data);
+			setMessage({
+				type: "success",
+				text: data?.message
+			});
+
+		} catch (err) {
+			console.log("err::", err);
+			setLoading(false);
+			if (err?.response?.data) {
+				const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
+				setMessage({
+					type: "error",
+					text: errorData
+				});
+			}
+		}
 	};
 
 	const onGoogleLogin = () => {
@@ -69,25 +97,25 @@ export const LoginForm = props => {
 			};
 		}
 	}, []);
-	
+
 	const renderOtherSignIn = (
 		<div>
 			<Divider>
 				<span className="text-muted font-size-base font-weight-normal">or connect with</span>
 			</Divider>
 			<div className="d-flex justify-content-center">
-				<Button 
-					onClick={() => onGoogleLogin()} 
-					className="mr-2" 
-					disabled={loading} 
-					icon={<CustomIcon svg={GoogleSVG}/>}
+				<Button
+					onClick={() => onGoogleLogin()}
+					className="mr-2"
+					disabled={loading}
+					icon={<CustomIcon svg={GoogleSVG} />}
 				>
 					Google
 				</Button>
-				<Button 
-					onClick={() => onFacebookLogin()} 
-					icon={<CustomIcon svg={FacebookSVG}/>}
-					disabled={loading} 
+				<Button
+					onClick={() => onFacebookLogin()}
+					icon={<CustomIcon svg={FacebookSVG} />}
+					disabled={loading}
 				>
 					Facebook
 				</Button>
@@ -95,71 +123,74 @@ export const LoginForm = props => {
 		</div>
 	)
 
+	console.log("message::", message);
+
+
 	return (
 		<>
-			<motion.div 
-				initial={{ opacity: 0, marginBottom: 0 }} 
-				animate={{ 
-					opacity: showMessage ? 1 : 0,
-					marginBottom: showMessage ? 20 : 0 
-				}}> 
-				<Alert type="error" showIcon message={message}></Alert>
+			<motion.div
+				initial={{ opacity: 0, marginBottom: 0 }}
+				animate={{
+					opacity: message?.text ? 1 : 0,
+					marginBottom: message?.text ? 20 : 0
+				}}>
+				<Alert type={message?.type} showIcon message={message?.text}></Alert>
 			</motion.div>
-			<Form 
-				layout="vertical" 
-				name="login-form" 
+			<Form
+				layout="vertical"
+				name="login-form"
 				initialValues={initialCredential}
 				onFinish={onLogin}
 			>
-				<Form.Item 
-					name="email" 
-					label="Email" 
+				<Form.Item
+					name="username"
+					label="Username"
 					rules={[
-						{ 
+						{
 							required: true,
-							message: 'Please input your email',
+							message: 'Please input your email or mobile',
 						},
-						{ 
-							type: 'email',
-							message: 'Please enter a validate email!'
+						{
+							type: 'text',
+							message: 'Please enter a validate email or mobile!'
 						}
 					]}>
-					<Input prefix={<MailOutlined className="text-primary" />}/>
+					<Input placeholder='Enter email address or mobile number' prefix={<UserOutlined className="text-primary" />} />
 				</Form.Item>
-				<Form.Item 
-					name="password" 
+				<Form.Item
+					name="password"
 					label={
-						<div className={`${showForgetPassword? 'd-flex justify-content-between w-100 align-items-center' : ''}`}>
+						<div className={`${showForgetPassword ? 'd-flex justify-content-between w-100 align-items-center' : ''}`}>
 							<span>Password</span>
 							{
-								showForgetPassword && 
-								<span 
-									onClick={() => onForgetPasswordClick} 
+								showForgetPassword &&
+								<span
+									onClick={() => onForgetPasswordClick}
 									className="cursor-pointer font-size-sm font-weight-normal text-muted"
 								>
 									Forget Password?
 								</span>
-							} 
+							}
 						</div>
-					} 
+					}
 					rules={[
-						{ 
+						{
 							required: true,
 							message: 'Please input your password',
 						}
 					]}
 				>
-					<Input.Password prefix={<LockOutlined className="text-primary" />}/>
+					<Input.Password placeholder='Enter your password' prefix={<LockOutlined className="text-primary" />} />
 				</Form.Item>
 				<Form.Item>
 					<Button type="primary" htmlType="submit" block loading={loading}>
 						Sign In
 					</Button>
 				</Form.Item>
-				{
+				{/* {
 					otherSignIn ? renderOtherSignIn : null
-				}
-				{ extra }
+				} */}
+				{extra}
 			</Form>
 		</>
 	)
@@ -179,9 +210,9 @@ LoginForm.defaultProps = {
 	showForgetPassword: false
 };
 
-const mapStateToProps = ({auth}) => {
-	const {loading, message, showMessage, token, redirect} = auth;
-  return {loading, message, showMessage, token, redirect}
+const mapStateToProps = ({ auth }) => {
+	const { loading, message, showMessage, token, redirect } = auth;
+	return { loading, message, showMessage, token, redirect }
 }
 
 const mapDispatchToProps = {
