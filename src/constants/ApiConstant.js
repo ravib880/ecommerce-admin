@@ -5,6 +5,11 @@ const frontEndAPI = {
     signin: `${API_BASE_URL}user/signin`,
 }
 
+const header = {
+    headers: "",
+    token: "essentials"
+}
+
 export {
     API_BASE_URL,
     frontEndAPI,

@@ -33,10 +33,11 @@ export const LoginForm = props => {
 		extra,
 		signIn,
 		token,
-		// loading,
+		adminData,
+		loading,
 		redirect,
 		showMessage,
-		// message,
+		message,
 		allowRedirect = true
 	} = props
 
@@ -46,34 +47,10 @@ export const LoginForm = props => {
 		email: '',
 		password: ''
 	}
-	const [loading, setLoading] = useState(false);
-	const [message, setMessage] = useState({ type: "error", text: "" });
 
 	const onLogin = async (values) => {
-		// showLoading()
-		// signIn(values);
-
-		setLoading(true);
-		try {
-			const { data } = await axios.post(frontEndAPI?.signin, { ...values, role: "ADMIN" })
-			setLoading(false);
-			console.log("data::", data);
-			setMessage({
-				type: "success",
-				text: data?.message
-			});
-
-		} catch (err) {
-			console.log("err::", err);
-			setLoading(false);
-			if (err?.response?.data) {
-				const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
-				setMessage({
-					type: "error",
-					text: errorData
-				});
-			}
-		}
+		showLoading()
+		signIn(values);
 	};
 
 	const onGoogleLogin = () => {
@@ -87,7 +64,8 @@ export const LoginForm = props => {
 	}
 
 	useEffect(() => {
-		if (token !== null && allowRedirect) {
+		// if ((token !== null) && allowRedirect) {
+		if (adminData !== null && allowRedirect) {
 			navigate(redirect)
 		}
 		if (showMessage) {
@@ -122,9 +100,6 @@ export const LoginForm = props => {
 			</div>
 		</div>
 	)
-
-	console.log("message::", message);
-
 
 	return (
 		<>
@@ -211,8 +186,8 @@ LoginForm.defaultProps = {
 };
 
 const mapStateToProps = ({ auth }) => {
-	const { loading, message, showMessage, token, redirect } = auth;
-	return { loading, message, showMessage, token, redirect }
+	const { loading, message, showMessage, token, adminData, redirect } = auth;
+	return { loading, message, showMessage, token, adminData, redirect }
 }
 
 const mapDispatchToProps = {

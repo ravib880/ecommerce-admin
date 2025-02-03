@@ -12,10 +12,10 @@ const AuthLayout = lazy(() => import('./AuthLayout'));
 
 const Layouts = () => {
 
-	const token = useSelector(state => state.auth.token);
+	const adminData = useSelector(state => state.auth.adminData);
 	const blankLayout = useSelector(state => state.theme.blankLayout);
 
-	const Layout = token && !blankLayout ? AppLayout : AuthLayout;
+	const Layout = (adminData !== null) && !blankLayout ? AppLayout : AuthLayout;
 
 	const locale = useSelector(state => state.theme.locale);
 
@@ -27,11 +27,11 @@ const Layouts = () => {
 
 	useBodyClass(`dir-${direction}`);
 
-	const themeConfig = currentTheme === 'light' ? {...lightTheme} : {...darkTheme}
+	const themeConfig = currentTheme === 'light' ? { ...lightTheme } : { ...darkTheme }
 
 	return (
 		<ConfigProvider theme={themeConfig} direction={direction} locale={currentAppLocale.antd}>
-			<Suspense fallback={<Loading cover="content"/>}>
+			<Suspense fallback={<Loading cover="content" />}>
 				<Layout>
 					<Routes />
 				</Layout>

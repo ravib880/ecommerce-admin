@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { AUTH_TOKEN } from 'constants/AuthConstant';
+import axios from 'axios';
+import { frontEndAPI } from 'constants/ApiConstant';
+import { AUTH_ADMIN, AUTH_TOKEN } from 'constants/AuthConstant';
 import FirebaseService from 'services/FirebaseService';
 
 export const initialState = {
@@ -7,26 +9,53 @@ export const initialState = {
 	message: '',
 	showMessage: false,
 	redirect: '',
-	token: localStorage.getItem(AUTH_TOKEN) || null
+	token: localStorage.getItem(AUTH_TOKEN) || null,
+	adminData: JSON.parse(localStorage.getItem(AUTH_ADMIN)) || null
 }
 
-export const signIn = createAsyncThunk('auth/signIn',async (data, { rejectWithValue }) => {
-	const { email, password } = data
+// export const signIn = createAsyncThunk('auth/signIn',async (data, { rejectWithValue }) => {
+// 	const { email, password } = data
+// 	try {
+// 		const response = await FirebaseService.signInEmailRequest(email, password)
+// 		if (response.user) {
+// 			const token = response.user.refreshToken;
+// 			localStorage.setItem(AUTH_TOKEN, response.user.refreshToken);
+// 			return token;
+// 		} else {
+// 			return rejectWithValue(response.message?.replace('Firebase: ', ''));
+// 		}
+// 	} catch (err) {
+// 		return rejectWithValue(err.message || 'Error')
+// 	}
+// })
+
+export const signIn = createAsyncThunk('auth/signIn', async (data, { rejectWithValue }) => {
+	const { username, password } = data;
 	try {
-		const response = await FirebaseService.signInEmailRequest(email, password)
-		if (response.user) {
-			const token = response.user.refreshToken;
-			localStorage.setItem(AUTH_TOKEN, response.user.refreshToken);
-			return token;
-		} else {
-			return rejectWithValue(response.message?.replace('Firebase: ', ''));
+		const { data } = await axios.post(frontEndAPI?.signin, { username, password, role: "ADMIN" })
+		console.log("data::", data);
+		if (data?.data) {
+			localStorage.setItem(AUTH_ADMIN, JSON.stringify(data?.data));
+			const adminData = data?.data;
+			return adminData;
+		}
+		else {
+			return rejectWithValue(data?.message ?? ("Unknown error occurs."))
 		}
 	} catch (err) {
-		return rejectWithValue(err.message || 'Error')
+		if (err?.response?.data) {
+			const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
+			console.log("errorData::", errorData);
+			return rejectWithValue({
+				text: errorData || "Error",
+				type: "error"
+			})
+		}
 	}
+
 })
 
-export const signUp = createAsyncThunk('auth/signUp',async (data, { rejectWithValue }) => {
+export const signUp = createAsyncThunk('auth/signUp', async (data, { rejectWithValue }) => {
 	const { email, password } = data
 	try {
 		const response = await FirebaseService.signUpEmailRequest(email, password)
@@ -42,14 +71,16 @@ export const signUp = createAsyncThunk('auth/signUp',async (data, { rejectWithVa
 	}
 })
 
-export const signOut = createAsyncThunk('auth/signOut',async () => {
-    const response = await FirebaseService.signOutRequest()
-	localStorage.removeItem(AUTH_TOKEN);
-    return response.data
+export const signOut = createAsyncThunk('auth/signOut', async () => {
+	// const response = await FirebaseService.signOutRequest()
+	// localStorage.removeItem(AUTH_TOKEN);
+	localStorage.removeItem(AUTH_ADMIN);
+
+	return null
 })
 
 export const signInWithGoogle = createAsyncThunk('auth/signInWithGoogle', async (_, { rejectWithValue }) => {
-    const response = await FirebaseService.signInGoogleRequest()
+	const response = await FirebaseService.signInGoogleRequest()
 	if (response.user) {
 		const token = response.user.refreshToken;
 		localStorage.setItem(AUTH_TOKEN, response.user.refreshToken);
@@ -60,7 +91,7 @@ export const signInWithGoogle = createAsyncThunk('auth/signInWithGoogle', async 
 })
 
 export const signInWithFacebook = createAsyncThunk('auth/signInWithFacebook', async (_, { rejectWithValue }) => {
-    const response = await FirebaseService.signInFacebookRequest()
+	const response = await FirebaseService.signInFacebookRequest()
 	if (response.user) {
 		const token = response.user.refreshToken;
 		localStorage.setItem(AUTH_TOKEN, response.user.refreshToken);
@@ -169,7 +200,7 @@ export const authSlice = createSlice({
 	},
 })
 
-export const { 
+export const {
 	authenticated,
 	showAuthMessage,
 	hideAuthMessage,
