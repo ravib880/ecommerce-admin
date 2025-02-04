@@ -9,10 +9,10 @@ import {
 
 const ProtectedRoute = () => {
 
-	const { token } = useSelector(state => state.auth)
+	const { adminData } = useSelector(state => state.auth)
 	const location = useLocation()
 
-	if (!token) {
+	if (!adminData) {
 		return <Navigate to={`${AUTH_PREFIX_PATH}${UNAUTHENTICATED_ENTRY}?${REDIRECT_URL_KEY}=${location.pathname}`} replace />;
 	}
 

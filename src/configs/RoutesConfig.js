@@ -51,6 +51,11 @@ export const protectedRoutes = [
         component: React.lazy(() => import('views/app-views/dashboards/default')),
     },
     {
+        key: 'dashboard.category',
+        path: `${APP_PREFIX_PATH}/category`,
+        component: React.lazy(() => import('views/app-views/category/Index')),
+    },
+    {
         key: 'dashboard.analytic',
         path: `${APP_PREFIX_PATH}/dashboards/analytic`,
         component: React.lazy(() => import('views/app-views/dashboards/analytic')),

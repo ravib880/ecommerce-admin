@@ -3,6 +3,7 @@ const API_BASE_URL = (window?.location?.hostname === 'kamal-textile.in') ? "http
 const frontEndAPI = {
     signup: `${API_BASE_URL}user/signup`,
     signin: `${API_BASE_URL}user/signin`,
+    signout: `${API_BASE_URL}user/signout`,
 }
 
 const header = {

@@ -1,5 +1,5 @@
-import { 
-  DashboardOutlined, 
+import {
+  DashboardOutlined,
   AppstoreOutlined,
   FileTextOutlined,
   PieChartOutlined,
@@ -185,6 +185,14 @@ const dashBoardNavTree = [{
       path: `${APP_PREFIX_PATH}/dashboards/default`,
       title: 'sidenav.dashboard.default',
       icon: DashboardOutlined,
+      breadcrumb: false,
+      submenu: []
+    },
+    {
+      key: 'category',
+      path: `${APP_PREFIX_PATH}/category`,
+      title: 'sidenav.category.default',
+      icon: AppstoreOutlined,
       breadcrumb: false,
       submenu: []
     },

@@ -15,7 +15,7 @@ const Layouts = () => {
 	const adminData = useSelector(state => state.auth.adminData);
 	const blankLayout = useSelector(state => state.theme.blankLayout);
 
-	const Layout = (adminData !== null) && !blankLayout ? AppLayout : AuthLayout;
+	const Layout = ((adminData !== null) && !blankLayout) ? AppLayout : AuthLayout;
 
 	const locale = useSelector(state => state.theme.locale);
 

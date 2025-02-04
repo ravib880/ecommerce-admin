@@ -29,7 +29,7 @@ export const AnnualStatisticData = [
 	{
 		title: 'Revenue',
 		value:'$2,454', 
-		status: -11.4,
+		status: -11.5,
 		subtitle: `Compare to last year (2019)`
 	},
 	{

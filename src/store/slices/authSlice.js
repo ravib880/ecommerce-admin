@@ -13,34 +13,20 @@ export const initialState = {
 	adminData: JSON.parse(localStorage.getItem(AUTH_ADMIN)) || null
 }
 
-// export const signIn = createAsyncThunk('auth/signIn',async (data, { rejectWithValue }) => {
-// 	const { email, password } = data
-// 	try {
-// 		const response = await FirebaseService.signInEmailRequest(email, password)
-// 		if (response.user) {
-// 			const token = response.user.refreshToken;
-// 			localStorage.setItem(AUTH_TOKEN, response.user.refreshToken);
-// 			return token;
-// 		} else {
-// 			return rejectWithValue(response.message?.replace('Firebase: ', ''));
-// 		}
-// 	} catch (err) {
-// 		return rejectWithValue(err.message || 'Error')
-// 	}
-// })
-
 export const signIn = createAsyncThunk('auth/signIn', async (data, { rejectWithValue }) => {
 	const { username, password } = data;
 	try {
 		const { data } = await axios.post(frontEndAPI?.signin, { username, password, role: "ADMIN" })
-		console.log("data::", data);
 		if (data?.data) {
 			localStorage.setItem(AUTH_ADMIN, JSON.stringify(data?.data));
 			const adminData = data?.data;
 			return adminData;
 		}
 		else {
-			return rejectWithValue(data?.message ?? ("Unknown error occurs."))
+			return rejectWithValue({
+				text: data?.message ?? "Error",
+				type: "error"
+			})
 		}
 	} catch (err) {
 		if (err?.response?.data) {
@@ -71,12 +57,18 @@ export const signUp = createAsyncThunk('auth/signUp', async (data, { rejectWithV
 	}
 })
 
-export const signOut = createAsyncThunk('auth/signOut', async () => {
-	// const response = await FirebaseService.signOutRequest()
-	// localStorage.removeItem(AUTH_TOKEN);
-	localStorage.removeItem(AUTH_ADMIN);
-
-	return null
+export const signOut = createAsyncThunk('auth/signOut', async (data) => {
+	const { token } = data;
+	try {
+		const { data } = await axios.post(frontEndAPI?.signout, { token })
+		localStorage.removeItem(AUTH_ADMIN);
+	} catch (err) {
+		if (err?.response?.data) {
+			const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
+			console.log("errorData::", errorData);
+			return null
+		}
+	}
 })
 
 export const signInWithGoogle = createAsyncThunk('auth/signInWithGoogle', async (_, { rejectWithValue }) => {
@@ -123,6 +115,7 @@ export const authSlice = createSlice({
 		signOutSuccess: (state) => {
 			state.loading = false
 			state.token = null
+			state.adminData = null
 			state.redirect = '/'
 		},
 		showLoading: (state) => {
@@ -141,7 +134,8 @@ export const authSlice = createSlice({
 			.addCase(signIn.fulfilled, (state, action) => {
 				state.loading = false
 				state.redirect = '/'
-				state.token = action.payload
+				// state.token = action.payload
+				state.adminData = action.payload;
 			})
 			.addCase(signIn.rejected, (state, action) => {
 				state.message = action.payload
@@ -151,6 +145,7 @@ export const authSlice = createSlice({
 			.addCase(signOut.fulfilled, (state) => {
 				state.loading = false
 				state.token = null
+				state.adminData = null
 				state.redirect = '/'
 			})
 			.addCase(signOut.rejected, (state) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { Button, Form, Input, Divider, Alert } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
@@ -33,7 +33,6 @@ export const LoginForm = props => {
 		extra,
 		signIn,
 		token,
-		adminData,
 		loading,
 		redirect,
 		showMessage,
@@ -41,6 +40,7 @@ export const LoginForm = props => {
 		allowRedirect = true
 	} = props
 
+	const adminData = useSelector(state => state.auth.adminData);
 	const initialCredential = {
 		// email: 'user1@themenate.net',
 		// password: '2005ipo'
@@ -65,6 +65,9 @@ export const LoginForm = props => {
 
 	useEffect(() => {
 		// if ((token !== null) && allowRedirect) {
+		console.log("allowRedirect::", allowRedirect);
+		console.log("redirect::", redirect);
+
 		if (adminData !== null && allowRedirect) {
 			navigate(redirect)
 		}
@@ -74,7 +77,11 @@ export const LoginForm = props => {
 				clearTimeout(timer);
 			};
 		}
-	}, []);
+	}, [adminData]);
+
+	useEffect(() => {
+		console.log("adminData::", adminData);
+	}, [adminData])
 
 	const renderOtherSignIn = (
 		<div>

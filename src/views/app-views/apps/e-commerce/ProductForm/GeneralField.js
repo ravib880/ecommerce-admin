@@ -7,6 +7,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 const { Dragger } = Upload;
 const { Option } = Select;
 
+
 const rules = {
 	name: [
 		{

@@ -1,18 +1,19 @@
 import React from 'react';
 import { Dropdown, Avatar } from 'antd';
-import { useDispatch } from 'react-redux'
-import { 
-	EditOutlined, 
-	SettingOutlined, 
-	ShopOutlined, 
-	QuestionCircleOutlined, 
-	LogoutOutlined 
+import { useDispatch, useSelector } from 'react-redux'
+import {
+	EditOutlined,
+	SettingOutlined,
+	ShopOutlined,
+	QuestionCircleOutlined,
+	LogoutOutlined
 } from '@ant-design/icons';
 import NavItem from './NavItem';
 import Flex from 'components/shared-components/Flex';
 import { signOut } from 'store/slices/authSlice';
 import styled from '@emotion/styled';
 import { FONT_WEIGHT, MEDIA_QUERIES, SPACER, FONT_SIZES } from 'constants/ThemeConstant'
+import useSelection from 'antd/es/table/hooks/useSelection';
 
 const Icon = styled.div(() => ({
 	fontSize: FONT_SIZES.LG
@@ -49,9 +50,13 @@ const MenuItem = (props) => (
 const MenuItemSignOut = (props) => {
 
 	const dispatch = useDispatch();
+	const adminData = useSelector(state => state.auth.adminData);
+
+	console.log("adminData::", adminData);
+
 
 	const handleSignOut = () => {
-		dispatch(signOut())
+		dispatch(signOut({ token: adminData?.token }))
 	}
 
 	return (
@@ -89,9 +94,9 @@ const items = [
 	}
 ]
 
-export const NavProfile = ({mode}) => {
+export const NavProfile = ({ mode }) => {
 	return (
-		<Dropdown placement="bottomRight" menu={{items}} trigger={["click"]}>
+		<Dropdown placement="bottomRight" menu={{ items }} trigger={["click"]}>
 			<NavItem mode={mode}>
 				<Profile>
 					<Avatar src="/img/avatars/thumb-1.jpg" />
