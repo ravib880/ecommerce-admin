@@ -4,14 +4,18 @@ const frontEndAPI = {
     signup: `${API_BASE_URL}user/signup`,
     signin: `${API_BASE_URL}user/signin`,
     signout: `${API_BASE_URL}user/signout`,
+    getCategoryList: `${API_BASE_URL}category/list`,
 }
 
-const header = {
-    headers: "",
-    token: "essentials"
+const header = (token) => {
+    return {
+        "token": token ?? "essentials",
+        "Content-Type": "",
+    }
 }
 
 export {
     API_BASE_URL,
     frontEndAPI,
+    header
 }

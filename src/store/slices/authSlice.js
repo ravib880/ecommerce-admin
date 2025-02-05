@@ -17,9 +17,13 @@ export const signIn = createAsyncThunk('auth/signIn', async (data, { rejectWithV
 	const { username, password } = data;
 	try {
 		const { data } = await axios.post(frontEndAPI?.signin, { username, password, role: "ADMIN" })
+
 		if (data?.data) {
-			localStorage.setItem(AUTH_ADMIN, JSON.stringify(data?.data));
-			const adminData = data?.data;
+			const adminData = {
+				...data?.data,
+				token: `Bearer ${data?.data?.token}`
+			};
+			localStorage.setItem(AUTH_ADMIN, JSON.stringify({ adminData }));
 			return adminData;
 		}
 		else {
@@ -29,13 +33,28 @@ export const signIn = createAsyncThunk('auth/signIn', async (data, { rejectWithV
 			})
 		}
 	} catch (err) {
-		if (err?.response?.data) {
-			const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
-			console.log("errorData::", errorData);
+		if (err?.response) {
+			const status = err.response.status;
+			const errorData = err.response.data?.message ?? err.response.data?.error;
+
+			if (status === 500) {
+				console.error("Internal Server Error:", errorData);
+				return rejectWithValue({
+					text: "Something went wrong on the server. Please try again later.",
+					type: "error"
+				});
+			}
+
 			return rejectWithValue({
 				text: errorData || "Error",
 				type: "error"
-			})
+			});
+		} else {
+			// Handle cases where there's no response (e.g., network error)
+			return rejectWithValue({
+				text: "Network error. Please check your internet connection.",
+				type: "error"
+			});
 		}
 	}
 
@@ -63,9 +82,18 @@ export const signOut = createAsyncThunk('auth/signOut', async (data) => {
 		const { data } = await axios.post(frontEndAPI?.signout, { token })
 		localStorage.removeItem(AUTH_ADMIN);
 	} catch (err) {
-		if (err?.response?.data) {
-			const errorData = err?.response?.data?.message ?? err?.response?.data?.error; // Extract backend errors
-			console.log("errorData::", errorData);
+		if (err?.response) {
+			const status = err.response.status;
+			const errorData = err.response.data?.message ?? err.response.data?.error;
+
+			if (status === 500) {
+				console.error("Internal Server Error:", errorData);
+				return null
+			}
+
+			return null
+		} else {
+			// Handle cases where there's no response (e.g., network error)
 			return null
 		}
 	}
