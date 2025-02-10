@@ -24,6 +24,7 @@ function Index() {
 
         // Store file object instead of converting to base64
         setUploadedImage(URL.createObjectURL(file));
+        console.log("file::", file);
 
         setUploadLoading(false);
         form.setFieldsValue({ thumbnail: file }); // Set form field value
@@ -34,8 +35,6 @@ function Index() {
 
     const onFinish = async (values) => {
         try {
-            console.log("headerImage::", headerImage(adminData?.token));
-            
             const { data } = await axios.post(frontEndAPI?.createCategory, values, headerImage(adminData?.token))
             console.log("data::", data);
             setMessage({
