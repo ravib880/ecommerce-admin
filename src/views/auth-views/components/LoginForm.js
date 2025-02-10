@@ -65,9 +65,6 @@ export const LoginForm = props => {
 
 	useEffect(() => {
 		// if ((token !== null) && allowRedirect) {
-		console.log("allowRedirect::", allowRedirect);
-		console.log("redirect::", redirect);
-
 		if (adminData !== null && allowRedirect) {
 			navigate(redirect)
 		}
@@ -78,10 +75,6 @@ export const LoginForm = props => {
 			};
 		}
 	}, [adminData]);
-
-	useEffect(() => {
-		console.log("adminData::", adminData);
-	}, [adminData])
 
 	const renderOtherSignIn = (
 		<div>

@@ -23,7 +23,8 @@ export const signIn = createAsyncThunk('auth/signIn', async (data, { rejectWithV
 				...data?.data,
 				token: `Bearer ${data?.data?.token}`
 			};
-			localStorage.setItem(AUTH_ADMIN, JSON.stringify({ adminData }));
+			localStorage.setItem(AUTH_ADMIN, JSON.stringify(adminData));
+			// initialState?.adminData == adminData
 			return adminData;
 		}
 		else {
@@ -162,7 +163,6 @@ export const authSlice = createSlice({
 			.addCase(signIn.fulfilled, (state, action) => {
 				state.loading = false
 				state.redirect = '/'
-				// state.token = action.payload
 				state.adminData = action.payload;
 			})
 			.addCase(signIn.rejected, (state, action) => {

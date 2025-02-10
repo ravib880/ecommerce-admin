@@ -52,9 +52,6 @@ const MenuItemSignOut = (props) => {
 	const dispatch = useDispatch();
 	const adminData = useSelector(state => state.auth.adminData);
 
-	console.log("adminData::", adminData);
-
-
 	const handleSignOut = () => {
 		dispatch(signOut({ token: adminData?.token }))
 	}

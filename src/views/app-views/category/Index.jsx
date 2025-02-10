@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { Card, Row, Col, message, Upload, Form, Input, Button, Table, Tag, Divider } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import { Card, Row, Col, message, Upload, Form, Input, Button, Table, Tag, Divider, Alert } from "antd";
+import { DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
 import { ImageSvg } from "assets/svg/icon";
 import CustomIcon from "components/util-components/CustomIcon";
 import axios from "axios";
-import { frontEndAPI } from "constants/ApiConstant";
+import { BASE_URL, frontEndAPI, header, headerImage } from "constants/ApiConstant";
+import { useSelector } from "react-redux";
+import { motion } from "framer-motion"
 // import "./index.less"; // Import your custom styles
 
 const { Dragger } = Upload;
@@ -12,96 +14,124 @@ const { Dragger } = Upload;
 function Index() {
     const [uploadedImg, setUploadedImage] = useState("");
     const [uploadLoading, setUploadLoading] = useState(false);
+    const [categoryData, setCategoryData] = useState([]);
+    const adminData = useSelector(state => state.auth.adminData);
     const [form] = Form.useForm(); // Hook for managing form instance
-
-    // Convert image file to base64
-    const getBase64 = (file, callback) => {
-        const reader = new FileReader();
-        reader.onload = () => callback(reader.result);
-        reader.readAsDataURL(file);
-    };
+    const [message, setMessage] = useState({ text: "", type: "error" });
 
     const beforeUpload = (file) => {
         setUploadLoading(true);
-        getBase64(file, (imageUrl) => {
-            setUploadedImage(imageUrl);
-            setUploadLoading(false);
-            form.setFieldsValue({ image: imageUrl }); // Set form field value
-        });
+
+        // Store file object instead of converting to base64
+        setUploadedImage(URL.createObjectURL(file));
+
+        setUploadLoading(false);
+        form.setFieldsValue({ thumbnail: file }); // Set form field value
+
         return false; // Prevent default upload behavior
     };
 
-    const onFinish = values => {
-        console.log("Success:", values);
+
+    const onFinish = async (values) => {
+        try {
+            console.log("headerImage::", headerImage(adminData?.token));
+            
+            const { data } = await axios.post(frontEndAPI?.createCategory, values, headerImage(adminData?.token))
+            console.log("data::", data);
+            setMessage({
+                text: "Ctageory created successfully!",
+                type: "success"
+            })
+            getCategoryList();
+        } catch (error) {
+            console.error("error::", error);
+            setMessage({
+                text: "Unknown error occurs!",
+                type: "error"
+            })
+        }
     };
 
     const columns = [
         {
+            title: "Thumbnail",
+            dataIndex: "thumbnail",
+            key: "thumbnail",
+            render: (text) => <img src={`${BASE_URL + text}`} alt="Thumbnail" style={{ width: 50, height: 50, objectFit: "contain" }} />
+        },
+        {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: text => <a href="/#">{text}</a>
         },
         {
-            title: "Age",
-            dataIndex: "age",
-            key: "age"
-        },
-        {
-            title: "Address",
-            dataIndex: "address",
-            key: "address"
+            title: "Description",
+            dataIndex: "description",
+            key: "description"
         },
         {
             title: "Action",
             key: "action",
-            render: (text, record) => (
+            render: (text) => (
                 <span>
-                    <a href="/#">Invite {record.name}</a>
+                    <EditOutlined onClick={() => handleEditCategory(text)} />
                     <Divider type="vertical" />
-                    <a href="/#">Delete</a>
+                    <DeleteOutlined onClick={() => handleDeleteCategory(text)} />
                 </span>
             )
         }
     ];
 
+    // Get all categories
     const getCategoryList = async () => {
         try {
-            const {data } = await axios.get(frontEndAPI?.getCategoryList)
+            const { data } = await axios.get(frontEndAPI?.getCategoryList, header(adminData?.token))
+            if (data?.data)
+                setCategoryData(data?.data);
+
         } catch (err) {
             console.err("err::", err);
         }
     }
 
-    const data = [
-        {
-            key: "1",
-            name: "John Brown",
-            age: 32,
-            address: "New York No. 1 Lake Park",
-            tags: ["nice", "developer"]
-        },
-        {
-            key: "2",
-            name: "Jim Green",
-            age: 42,
-            address: "London No. 1 Lake Park",
-            tags: ["loser"]
-        },
-        {
-            key: "3",
-            name: "Joe Black",
-            age: 32,
-            address: "Sidney No. 1 Lake Park",
-            tags: ["cool", "teacher"]
+    useEffect(() => {
+        getCategoryList();
+    }, [])
+
+    // handle edit categories
+    const handleEditCategory = async (item) => {
+        try {
+
+        } catch (error) {
+
         }
-    ];
+    }
+
+    // handle delete categories
+    const handleDeleteCategory = async (item) => {
+        try {
+
+        } catch (error) {
+
+        }
+    }
 
     return (
         <div className="category-container">
             <Row gutter={16}>
                 <Col xs={24} sm={24} md={12}>
                     <Card title="Category Form">
+                        {
+                            message?.text &&
+                            <motion.div
+                                initial={{ opacity: 0, marginBottom: 0 }}
+                                animate={{
+                                    opacity: message?.text ? 1 : 0,
+                                    marginBottom: message?.text ? 20 : 0
+                                }}>
+                                <Alert type={message?.type} showIcon message={message?.text}></Alert>
+                            </motion.div>
+                        }
                         <Form
                             form={form}
                             layout="vertical"
@@ -111,7 +141,7 @@ function Index() {
                             {/* Image Upload */}
                             <Form.Item
                                 label="Thumbnail"
-                                name="image"
+                                name="thumbnail"
                                 rules={[{ required: true, message: "Please upload a category image!" }]}
                             >
                                 <Dragger
@@ -167,7 +197,7 @@ function Index() {
 
                 <Col xs={24} sm={24} md={12}>
                     <Card title="Category List">
-                        <Table columns={columns} dataSource={data} />
+                        <Table columns={columns} dataSource={categoryData} />
                     </Card>
                 </Col>
             </Row>
